@@ -21,10 +21,20 @@
             display: inline-block;
             font-size: 16px;
         }
+        .color-selector-0 {background-color: #071821; border: 1px solid black;}
+        .color-selector-1 {background-color: #306850}
+        .color-selector-2 {background-color: #86c06c}
+        .color-selector-3 {background-color: #e0f8cf}
     </style>
 
     <body>
         <div class="canvas-container">
+            <div>
+                <button id="color-selector-0" class="color-selector-0"></button>
+                <button id="color-selector-1" class="color-selector-1"></button>
+                <button id="color-selector-2" class="color-selector-2"></button>
+                <button id="color-selector-3" class="color-selector-3"></button>
+            </div>
             <canvas id="canvas" width="512" height="512"></canvas>
             <button id="clear">Clear canvas</button>
         </div>
@@ -38,6 +48,8 @@
 
         const rows = 16;
         const columns = 16;
+
+        let selectedColor = 0;
 
         // const color = (row % 2) === (column % 2) ? colors[0] : colors[1];
         const grid = Array.from(Array(rows), () => new Array(columns).fill(colors[1]));
@@ -75,21 +87,34 @@
         const handleMouseDown = (context, canvas) => e => {
             const rect = canvas.getBoundingClientRect();
             const {row, column} = findGridLocation(e, rect, canvas);
-            colorPixel(column, row, colors[3], context);
+            colorPixel(column, row, colors[selectedColor], context);
         };
 
         const resetCanvas = context => _ => {
             initCanvas(context);
         }
 
-        const canvas = document.getElementById("canvas");
-        const clearButton = document.getElementById("clear");
+        // sets the border of the selected color's selector button
+        const setColorBorder = () => colors.forEach((_, index) => {
+            const button = document.getElementById("color-selector-" + index);
+            button.style.border = (index === selectedColor) ? "2px solid black" : "";
+        })
 
+        const selectColor = colorNumber => _ => {
+            selectedColor = colorNumber;
+            setColorBorder();
+        }
+
+        const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
 
-        canvas.addEventListener("mousedown", handleMouseDown(ctx, canvas));
-        clearButton.addEventListener("click", resetCanvas(ctx))
-
         initCanvas(ctx);
+
+        canvas.addEventListener("mousedown", handleMouseDown(ctx, canvas));
+        document.getElementById("clear").addEventListener("click", resetCanvas(ctx));
+        colors.forEach((_, index) => {
+            const button = document.getElementById("color-selector-" + index);
+            button.addEventListener("mousedown", selectColor(index));
+        })
     </script>
 </html>
