@@ -1,0 +1,70 @@
+<html lang="en">
+    <head>
+        <title>SKOTSE (some kind of tile set editor)</title>
+    </head>
+    <style>
+        canvas {
+            border: 1px solid black
+        }
+    </style>
+
+    <body>
+        <canvas id="canvas" width="512" height="512"></canvas>
+    </body>
+
+    <script>
+        // array of Gameboy colors
+        const colors = ["#071821", "#306850", "#86c06c", "#e0f8cf"];
+
+        const pixelSize = 32;
+
+        const rows = 16;
+        const columns = 16;
+
+        // const color = (row % 2) === (column % 2) ? colors[0] : colors[1];
+        const grid = Array.from(Array(rows), () => new Array(columns).fill(colors[1]));
+
+        // Transform grid coordinates to pixel coordinates
+        const findGridLocation = (e, rect, canvas) => {
+            // Calculate scaling factors
+            const scaleX = canvas.offsetWidth / canvas.width;
+            const scaleY = canvas.offsetHeight / canvas.height;
+
+            // Adjust mouse coordinates by scaling factor
+            const adjustedX = (e.clientX - rect.left) / scaleX;
+            const adjustedY = (e.clientY - rect.top) / scaleY;
+
+            // Calculate and return grid location
+            return {
+                column: Math.floor(adjustedX / pixelSize),
+                row: Math.floor(adjustedY / pixelSize)
+            };
+        };
+
+        const initCanvas = (context) => {
+            for (let row = 0; row < grid.length; row++) {
+                for (let column = 0; column < grid[row].length; column++) {
+                    colorPixel(column, row, grid[row][column], context);
+                }
+            }
+        }
+
+        const colorPixel = (column, row, color, context) => {
+            context.fillStyle = color;
+            context.fillRect(column * pixelSize, row * pixelSize, pixelSize, pixelSize);
+        }
+
+        const handleMouseDown = (context, canvas) => e => {
+            const rect = canvas.getBoundingClientRect();
+            const {row, column} = findGridLocation(e, rect, canvas);
+            colorPixel(column, row, colors[3], context);
+        };
+
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        initCanvas(ctx);
+        canvas.addEventListener("mousedown", handleMouseDown(ctx, canvas));
+
+    </script>
+</html>
