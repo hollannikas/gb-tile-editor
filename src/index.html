@@ -6,10 +6,28 @@
         canvas {
             border: 1px solid black
         }
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        button {
+            background-color: #04AA6D;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
     </style>
 
     <body>
-        <canvas id="canvas" width="512" height="512"></canvas>
+        <div class="canvas-container">
+            <canvas id="canvas" width="512" height="512"></canvas>
+            <button id="clear">Clear canvas</button>
+        </div>
     </body>
 
     <script>
@@ -60,11 +78,18 @@
             colorPixel(column, row, colors[3], context);
         };
 
+        const resetCanvas = context => _ => {
+            initCanvas(context);
+        }
+
         const canvas = document.getElementById("canvas");
+        const clearButton = document.getElementById("clear");
+
         const ctx = canvas.getContext("2d");
 
-        initCanvas(ctx);
         canvas.addEventListener("mousedown", handleMouseDown(ctx, canvas));
+        clearButton.addEventListener("click", resetCanvas(ctx))
 
+        initCanvas(ctx);
     </script>
 </html>
