@@ -69,18 +69,23 @@
             context.fillRect(column * pixelSize, row * pixelSize, pixelSize, pixelSize);
         }
 
-        // TODO: fill algorithm is not implemented. It only fills cells with the same color as the selected one.
+        // Recursive flood fill. Let's see if this holds up.
         const fill = (row, column) => {
             const colorToFill = grid[row][column];
-            for (let paintRow = 0; paintRow < grid.length; paintRow++) {
-                for (let paintColumn = 0; paintColumn < grid[paintRow].length; paintColumn++) {
-                    // only color cells that are different from the selected color
-                    if (grid[paintRow][paintColumn] === colorToFill) {
-                        grid[paintRow][paintColumn] = selectedColor;
-                        console.log(`grid[${paintRow}][${paintColumn}] = ${grid[paintRow][paintColumn]}`);
-                    }
+            const recursiveFill = (row, column) => {
+                if (row < 0 || row >= grid.length || column < 0 || column >= grid[row].length) {
+                    return;
                 }
+                if (grid[row][column] !== colorToFill) {
+                    return;
+                }
+                grid[row][column] = selectedColor;
+                recursiveFill(row - 1, column);
+                recursiveFill(row + 1, column);
+                recursiveFill(row, column - 1);
+                recursiveFill(row, column + 1);
             }
+            recursiveFill(row, column);
         }
 
         const handleMouseDown = (context, canvas) => e => {
