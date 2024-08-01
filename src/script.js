@@ -4,7 +4,7 @@ const colors = ["#071821", "#306850", "#86c06c", "#e0f8cf"];
 // brush types <Key, Value> = <brushType, cursorType>
 const brushTypes = {
     draw: "default",
-    fill: "cell"
+    fill: "url('images/paint-bucket.cur'), wait"
 };
 
 // Initialize default values
@@ -87,7 +87,7 @@ const resetCanvas = context => _ => {
 }
 
 const setBrush = (brushType, canvas) => _ => {
-    canvas.style = "cursor: " + brushTypes[brushType] + ";";
+    canvas.style.cursor = brushTypes[brushType];
     selectedBrush = brushType;
 }
 
