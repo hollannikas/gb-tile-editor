@@ -6,6 +6,10 @@
     <body>
         <div class="canvas-container">
             <div>
+                <button id="brush-fill">Fill</button>
+                <button id="brush-draw">draw</button>
+            </div>
+            <div>
                 <button id="color-selector-0" class="color-selector-0"></button>
                 <button id="color-selector-1" class="color-selector-1"></button>
                 <button id="color-selector-2" class="color-selector-2"></button>
@@ -20,15 +24,20 @@
         // array of Gameboy colors
         const colors = ["#071821", "#306850", "#86c06c", "#e0f8cf"];
 
-        const pixelSize = 32;
+        // brush types <Key, Value> = <brushType, cursorType>
+        const brushTypes = {
+            draw: "default",
+            fill: "cell"
+        };
 
+        // Initialize default values
+        let selectedBrush = "draw";
+        const pixelSize = 32;
         const rows = 16;
         const columns = 16;
-
         let selectedColor = 0;
 
-        // const color = (row % 2) === (column % 2) ? colors[0] : colors[1];
-        const grid = Array.from(Array(rows), () => new Array(columns).fill(colors[1]));
+        const grid = Array.from(Array(rows), () => new Array(columns).fill(1));
 
         // Transform grid coordinates to pixel coordinates
         const findGridLocation = (e, rect, canvas) => {
@@ -47,7 +56,7 @@
             };
         };
 
-        const initCanvas = (context) => {
+        const rePaintCanvas = (context) => {
             for (let row = 0; row < grid.length; row++) {
                 for (let column = 0; column < grid[row].length; column++) {
                     colorPixel(column, row, grid[row][column], context);
@@ -56,18 +65,48 @@
         }
 
         const colorPixel = (column, row, color, context) => {
-            context.fillStyle = color;
+            context.fillStyle = colors[color];
             context.fillRect(column * pixelSize, row * pixelSize, pixelSize, pixelSize);
+        }
+
+        // TODO: fill algorithm is not implemented. It only fills cells with the same color as the selected one.
+        const fill = (row, column) => {
+            const colorToFill = grid[row][column];
+            for (let paintRow = 0; paintRow < grid.length; paintRow++) {
+                for (let paintColumn = 0; paintColumn < grid[paintRow].length; paintColumn++) {
+                    // only color cells that are different from the selected color
+                    if (grid[paintRow][paintColumn] === colorToFill) {
+                        grid[paintRow][paintColumn] = selectedColor;
+                        console.log(`grid[${paintRow}][${paintColumn}] = ${grid[paintRow][paintColumn]}`);
+                    }
+                }
+            }
         }
 
         const handleMouseDown = (context, canvas) => e => {
             const rect = canvas.getBoundingClientRect();
             const {row, column} = findGridLocation(e, rect, canvas);
-            colorPixel(column, row, colors[selectedColor], context);
+            if (selectedBrush === "fill") {
+                fill(row, column);
+            } else {
+                grid[row][column] = selectedColor;
+            }
+            rePaintCanvas(context);
         };
 
         const resetCanvas = context => _ => {
-            initCanvas(context);
+            // set all cells to color 1
+            for (let row = 0; row < grid.length; row++) {
+                for (let column = 0; column < grid[row].length; column++) {
+                    grid[row][column] = 1;
+                }
+            }
+            rePaintCanvas(context);
+        }
+
+        const setBrush = (brushType, canvas) => _ => {
+            canvas.style = "cursor: " + brushTypes[brushType] + ";";
+            selectedBrush = brushType;
         }
 
         // sets the border of the selected color's selector button
@@ -84,7 +123,8 @@
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
 
-        initCanvas(ctx);
+        // Initialize canvas
+        rePaintCanvas(ctx);
 
         canvas.addEventListener("mousedown", handleMouseDown(ctx, canvas));
         document.getElementById("clear").addEventListener("click", resetCanvas(ctx));
@@ -92,5 +132,8 @@
             const button = document.getElementById("color-selector-" + index);
             button.addEventListener("mousedown", selectColor(index));
         })
+        document.getElementById("brush-fill").addEventListener("click", setBrush("fill", canvas));
+        document.getElementById("brush-draw").addEventListener("click", setBrush("draw", canvas));
+
     </script>
 </html>
